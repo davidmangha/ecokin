@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EcoKin - Tableau de bord</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/public/css/styles.css" rel="stylesheet">
+</head>
+<body data-page="dashboard">
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="/index.html">EcoKin</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Afficher le menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+          <li class="nav-item"><a class="nav-link" data-page-link="accueil" href="/index.html">Accueil</a></li>
+          <li class="nav-item"><a class="nav-link" data-page-link="carte" href="/carte.html">Carte</a></li>
+          <li class="nav-item"><a class="nav-link" data-page-link="sensibilisation" href="/sensibilisation.html">Sensibilisation</a></li>
+          <li class="nav-item d-none" data-auth-only><a class="nav-link" data-page-link="dashboard" href="/dashboard.html">Tableau de bord</a></li>
+          <li class="nav-item d-none" data-auth-only><a class="nav-link" data-page-link="signaler" href="/signaler.html">Signaler</a></li>
+          <li class="nav-item d-none" data-admin-only><a class="nav-link" data-page-link="administration" href="/administration.html">Administration</a></li>
+          <li class="nav-item dropdown d-none" data-auth-only>
+            <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown"><span data-user-label>Compte</span></button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="/profil.html">Profil utilisateur</a></li>
+              <li><button class="dropdown-item" data-logout>Deconnexion</button></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="app-shell">
+    <div class="container">
+      <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+        <div>
+          <h1 class="section-title h2 mb-2">Tableau de bord</h1>
+          <p class="lead-tight mb-0">Vue synthetique des signalements, urgences et types de dechets.</p>
+        </div>
+        <a class="btn btn-primary" href="/signaler.html"><i class="bi bi-plus-circle me-2"></i>Nouveau signalement</a>
+      </div>
+
+      <div id="dashboardStats" class="row g-3 mb-4"></div>
+
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <section class="surface p-3">
+            <h2 class="h5 mb-3">Par type de dechet</h2>
+            <ul id="typeStats" class="list-group list-group-flush"></ul>
+          </section>
+        </div>
+        <div class="col-lg-8">
+          <section class="surface p-3">
+            <h2 class="h5 mb-3">Signalements recents</h2>
+            <div class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Titre</th>
+                    <th>Commune</th>
+                    <th>Type</th>
+                    <th>Statut</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="recentSignalements"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/public/js/api.js"></script>
+  <script src="/public/js/auth.js"></script>
+  <script src="/public/js/app.js"></script>
+</body>
+</html>

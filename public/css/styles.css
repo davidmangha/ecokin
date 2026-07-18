@@ -1,0 +1,222 @@
+:root {
+  --ek-green: #1f7a4d;
+  --ek-green-dark: #145a3a;
+  --ek-teal: #087f8c;
+  --ek-amber: #f2a541;
+  --ek-red: #b42318;
+  --ek-ink: #1f2937;
+  --ek-muted: #667085;
+  --ek-line: #d9e3dd;
+  --ek-bg: #f6f8f5;
+  --ek-surface: #ffffff;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--ek-ink);
+  background: var(--ek-bg);
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: 0;
+}
+
+.navbar {
+  border-bottom: 1px solid var(--ek-line);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+}
+
+.navbar-brand {
+  color: var(--ek-green-dark);
+  font-weight: 800;
+}
+
+.nav-link {
+  color: var(--ek-muted);
+  font-weight: 600;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--ek-green-dark);
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--ek-green);
+  --bs-btn-border-color: var(--ek-green);
+  --bs-btn-hover-bg: var(--ek-green-dark);
+  --bs-btn-hover-border-color: var(--ek-green-dark);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--ek-green);
+  --bs-btn-border-color: var(--ek-green);
+  --bs-btn-hover-bg: var(--ek-green);
+  --bs-btn-hover-border-color: var(--ek-green);
+}
+
+.app-shell {
+  padding-top: 88px;
+  padding-bottom: 48px;
+}
+
+.section-title {
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.lead-tight {
+  color: var(--ek-muted);
+  max-width: 720px;
+}
+
+.surface {
+  background: var(--ek-surface);
+  border: 1px solid var(--ek-line);
+  border-radius: 8px;
+  box-shadow: 0 18px 45px rgba(31, 41, 55, 0.08);
+}
+
+.stat-card {
+  min-height: 132px;
+  padding: 18px;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.stat-label {
+  color: var(--ek-muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.quick-action {
+  min-height: 96px;
+}
+
+.map-frame {
+  min-height: 460px;
+  overflow: hidden;
+}
+
+.map-home {
+  min-height: 440px;
+}
+
+#incidentMap,
+#homeMap {
+  width: 100%;
+  min-height: 460px;
+}
+
+#homeMap {
+  min-height: 440px;
+}
+
+.form-control,
+.form-select {
+  border-color: var(--ek-line);
+  border-radius: 8px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--ek-teal);
+  box-shadow: 0 0 0 0.2rem rgba(8, 127, 140, 0.18);
+}
+
+.badge-status {
+  border-radius: 999px;
+  font-weight: 800;
+  padding: 0.42rem 0.72rem;
+}
+
+.badge-status[data-status="nouveau"] {
+  color: #7a3b00;
+  background: #fff2d6;
+}
+
+.badge-status[data-status="en_cours"] {
+  color: #0b4a6f;
+  background: #dff3ff;
+}
+
+.badge-status[data-status="resolu"] {
+  color: #145a3a;
+  background: #dff7e9;
+}
+
+.badge-status[data-status="rejete"],
+.badge-status[data-status="suspendu"] {
+  color: #7a1f17;
+  background: #ffe2df;
+}
+
+.badge-status[data-status="actif"] {
+  color: #145a3a;
+  background: #dff7e9;
+}
+
+.table {
+  vertical-align: middle;
+}
+
+.table thead th {
+  color: var(--ek-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.empty-state {
+  color: var(--ek-muted);
+  padding: 32px;
+  text-align: center;
+}
+
+.incident-photo {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.content-card {
+  height: 100%;
+}
+
+.content-card .card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-table-wrap {
+  max-height: 520px;
+  overflow: auto;
+}
+
+.footer {
+  color: var(--ek-muted);
+  border-top: 1px solid var(--ek-line);
+  background: #ffffff;
+}
+
+@media (max-width: 767.98px) {
+  .app-shell {
+    padding-top: 76px;
+  }
+
+  .stat-value {
+    font-size: 1.6rem;
+  }
+
+  .map-frame,
+  #incidentMap,
+  #homeMap {
+    min-height: 360px;
+  }
+}
