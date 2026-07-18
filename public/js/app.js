@@ -215,9 +215,16 @@
       window.EcoKin.api.request('/education/campagnes')
     ]);
 
-    contentRoot.innerHTML = contenus.map((item) => `
+    const educationImages = [
+      '/public/images/ecokin-education.png',
+      '/public/images/ecokin-reporting.png',
+      '/public/images/ecokin-hero.png'
+    ];
+
+    contentRoot.innerHTML = contenus.map((item, index) => `
       <div class="col-md-4">
         <article class="card content-card border-0 surface">
+          <img src="${educationImages[index % educationImages.length]}" alt="${html(item.titre)}">
           <div class="card-body">
             <span class="badge text-bg-light align-self-start">${html(item.categorie)}</span>
             <h2 class="h5 mb-0">${html(item.titre)}</h2>

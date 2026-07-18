@@ -45,10 +45,11 @@ Sous Windows PowerShell:
 Copy-Item .env.example .env
 ```
 
-3. Importer la base MySQL:
+3. Creer puis importer la base MySQL en local:
 
 ```bash
-mysql -u root -p < database/schema.sql
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS ecokin CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p ecokin < database/schema.sql
 ```
 
 4. Verifier les informations MySQL dans `.env`:
