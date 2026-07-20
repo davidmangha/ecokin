@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "description": "Plateforme ecologique pour signaler et suivre les incidents de dechets a Kinshasa.",
   "main": "server/server.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node server/server.js",
-    "dev": "nodemon server/server.js"
+    "dev": "nodemon server/server.js",
+    "migrate:ai": "node database/run-ai-migration.js"
   },
   "keywords": [
     "ecologie",

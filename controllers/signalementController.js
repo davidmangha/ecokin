@@ -1,5 +1,8 @@
 const Signalement = require('../models/Signalement');
 const Photo = require('../models/Photo');
+const { analyzeIncidentPhoto } = require('../server/services/aiAnalysisService');
+
+const wasteTypes = new Set(['plastique', 'organique', 'electronique', 'dangereux', 'encombrant', 'autre']);
 
 async function listSignalements(req, res, next) {
   try {
@@ -33,6 +36,7 @@ async function createSignalement(req, res, next) {
     const {
       titre,
       description,
+      article_sujet,
       type_dechet,
       commune_id,
       adresse,
@@ -47,11 +51,26 @@ async function createSignalement(req, res, next) {
       });
     }
 
+    const aiAnalysis = await analyzeIncidentPhoto(req.file);
+    const detectedWaste = aiAnalysis.type_dechet_ia;
+    const finalWasteType =
+      type_dechet === 'autre' && wasteTypes.has(detectedWaste) && detectedWaste !== 'inconnu'
+        ? detectedWaste
+        : type_dechet;
+
     const signalement = await Signalement.create({
       utilisateur_id: req.user.id,
       titre,
       description,
-      type_dechet,
+      article_sujet: article_sujet || aiAnalysis.article_sujet,
+      type_dechet: finalWasteType,
+      categorie_ia: aiAnalysis.categorie_ia,
+      type_dechet_ia: aiAnalysis.type_dechet_ia,
+      erosion_detectee: aiAnalysis.erosion_detectee,
+      confiance_ia: aiAnalysis.confiance_ia,
+      resume_ia: aiAnalysis.resume_ia,
+      articles_sujet: aiAnalysis.articles_sujet,
+      analyse_ia: aiAnalysis.analyse_ia,
       commune_id,
       adresse,
       latitude: Number(latitude),

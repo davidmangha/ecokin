@@ -5,14 +5,24 @@ class Signalement {
   static async create(data) {
     const [result] = await pool.query(
       `INSERT INTO signalements
-        (utilisateur_id, commune_id, titre, description, type_dechet, adresse, latitude, longitude, niveau_urgence)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (utilisateur_id, commune_id, titre, description, article_sujet, type_dechet,
+         categorie_ia, type_dechet_ia, erosion_detectee, confiance_ia, resume_ia,
+         articles_sujet, analyse_ia, adresse, latitude, longitude, niveau_urgence)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         data.utilisateur_id,
         data.commune_id || null,
         data.titre,
         data.description,
+        data.article_sujet || null,
         data.type_dechet,
+        data.categorie_ia || 'inconnu',
+        data.type_dechet_ia || 'inconnu',
+        data.erosion_detectee ? 1 : 0,
+        data.confiance_ia ?? null,
+        data.resume_ia || null,
+        data.articles_sujet ? JSON.stringify(data.articles_sujet) : null,
+        data.analyse_ia ? JSON.stringify(data.analyse_ia) : null,
         data.adresse || null,
         data.latitude,
         data.longitude,
@@ -112,6 +122,13 @@ class Signalement {
        ORDER BY total DESC`
     );
 
+    const [byAiCategory] = await pool.query(
+      `SELECT COALESCE(categorie_ia, 'inconnu') AS categorie_ia, COUNT(*) AS total
+       FROM signalements
+       GROUP BY COALESCE(categorie_ia, 'inconnu')
+       ORDER BY total DESC`
+    );
+
     const [byCommune] = await pool.query(
       `SELECT c.nom AS commune, COUNT(s.id) AS total
        FROM communes c
@@ -126,6 +143,7 @@ class Signalement {
     return {
       totals,
       byType,
+      byAiCategory,
       byCommune,
       recent: recent.slice(0, 8)
     };

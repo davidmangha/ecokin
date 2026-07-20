@@ -26,6 +26,113 @@
     return `<span class="badge-status" data-status="${status}">${status.replace('_', ' ')}</span>`;
   }
 
+  function parseJsonField(value, fallback) {
+    if (!value) return fallback;
+    if (typeof value !== 'string') return value;
+
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      return fallback;
+    }
+  }
+
+  function booleanValue(value) {
+    return value === true || value === 1 || value === '1' || value === 'true';
+  }
+
+  function confidenceLabel(value) {
+    if (value === null || value === undefined || value === '') return '';
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return '';
+    return `${Math.round(numeric)}%`;
+  }
+
+  function safeHref(value) {
+    const href = String(value || '').trim();
+    return href.startsWith('/') || href.startsWith('#') ? href : '/sensibilisation.html';
+  }
+
+  function aiSummary(item) {
+    const hasAi =
+      item?.resume_ia ||
+      item?.categorie_ia ||
+      item?.type_dechet_ia ||
+      booleanValue(item?.erosion_detectee);
+
+    if (!hasAi) return '';
+
+    const type = item.type_dechet_ia && item.type_dechet_ia !== 'inconnu'
+      ? `<span class="ai-chip">${html(item.type_dechet_ia)}</span>`
+      : '';
+    const erosion = booleanValue(item.erosion_detectee)
+      ? '<span class="ai-chip warning">Erosion</span>'
+      : '';
+    const confidence = confidenceLabel(item.confiance_ia)
+      ? `<span class="ai-chip muted">${confidenceLabel(item.confiance_ia)}</span>`
+      : '';
+
+    return `
+      <div class="ai-mini mt-2">
+        <div class="d-flex flex-wrap gap-1">${type}${erosion}${confidence}</div>
+        ${item.resume_ia ? `<div class="small text-muted mt-1">${html(item.resume_ia)}</div>` : ''}
+      </div>
+    `;
+  }
+
+  function articleLinks(item) {
+    const articles = parseJsonField(item?.articles_sujet, []);
+    if (!Array.isArray(articles) || !articles.length) return '';
+
+    return `
+      <div class="ai-articles mt-3">
+        <div class="small fw-bold mb-2">Articles conseilles</div>
+        <div class="list-group list-group-flush">
+          ${articles.map((article) => `
+            <a class="list-group-item list-group-item-action px-0" href="${safeHref(article.url)}">
+              <span class="fw-semibold">${html(article.titre)}</span>
+              <span class="d-block small text-muted">${html(article.resume)}</span>
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderAiPanel(item) {
+    if (!item) {
+      return `
+        <div class="d-flex align-items-center gap-2">
+          <span class="ai-icon"><i class="bi bi-stars"></i></span>
+          <div>
+            <div class="fw-bold">Analyse IA</div>
+            <div class="small text-muted">Aucune analyse pour le moment.</div>
+          </div>
+        </div>
+      `;
+    }
+
+    const confidence = confidenceLabel(item.confiance_ia);
+
+    return `
+      <div class="d-flex align-items-start gap-3">
+        <span class="ai-icon"><i class="bi bi-stars"></i></span>
+        <div class="flex-grow-1">
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+            <div class="fw-bold">Analyse IA</div>
+            ${item.categorie_ia ? `<span class="ai-chip">${html(item.categorie_ia)}</span>` : ''}
+            ${item.type_dechet_ia && item.type_dechet_ia !== 'inconnu' ? `<span class="ai-chip">${html(item.type_dechet_ia)}</span>` : ''}
+            ${booleanValue(item.erosion_detectee) ? '<span class="ai-chip warning">Erosion detectee</span>' : ''}
+            ${confidence ? `<span class="ai-chip muted">${confidence}</span>` : ''}
+          </div>
+          <div class="text-muted">${html(item.resume_ia, 'Analyse terminee.')}</div>
+          ${item.article_sujet ? `<div class="small mt-2"><span class="fw-semibold">Sujet:</span> ${html(item.article_sujet)}</div>` : ''}
+          ${articleLinks(item)}
+        </div>
+      </div>
+    `;
+  }
+
   async function loadCommunes(selectors = '.commune-select') {
     const selects = document.querySelectorAll(selectors);
     if (!selects.length) return [];
@@ -80,6 +187,7 @@
         <div class="fw-bold mb-1">${html(item.titre)}</div>
         ${photo}
         <div class="small text-muted">${html(item.commune_nom)} - ${html(item.type_dechet)}</div>
+        ${aiSummary(item)}
         <div class="mt-2">${statusBadge(item.statut)}</div>
       `);
     });
@@ -118,12 +226,22 @@
       </li>
     `).join('') || '<li class="list-group-item empty-state">Aucune donnee.</li>';
 
+    const aiList = document.querySelector('#aiStats');
+    if (aiList) {
+      aiList.innerHTML = (stats.byAiCategory || []).map((item) => `
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>${html(item.categorie_ia)}</span>
+          <span class="badge text-bg-info">${item.total}</span>
+        </li>
+      `).join('') || '<li class="list-group-item empty-state">Aucune analyse.</li>';
+    }
+
     const recentRows = document.querySelector('#recentSignalements');
     recentRows.innerHTML = stats.recent.map((item) => `
       <tr>
         <td>${html(item.titre)}</td>
         <td>${html(item.commune_nom)}</td>
-        <td>${html(item.type_dechet)}</td>
+        <td>${html(item.type_dechet)}${aiSummary(item)}</td>
         <td>${statusBadge(item.statut)}</td>
         <td>${formatDate(item.created_at)}</td>
       </tr>
@@ -138,6 +256,8 @@
 
     const geoButton = document.querySelector('#geoButton');
     const alert = document.querySelector('#signalementAlert');
+    const aiResult = document.querySelector('#aiAnalysisResult');
+    const submitButton = form.querySelector('button[type="submit"]');
 
     geoButton.addEventListener('click', () => {
       if (!navigator.geolocation) {
@@ -163,6 +283,21 @@
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       alert.innerHTML = '';
+      if (aiResult) {
+        aiResult.innerHTML = `
+          <div class="d-flex align-items-center gap-2">
+            <span class="ai-icon"><i class="bi bi-stars"></i></span>
+            <div>
+              <div class="fw-bold">Analyse IA</div>
+              <div class="small text-muted">Analyse de la photo en cours...</div>
+            </div>
+          </div>
+        `;
+      }
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Envoi en cours';
+      }
 
       try {
         const data = await window.EcoKin.api.request('/signalements', {
@@ -172,9 +307,20 @@
         });
 
         alert.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+        if (aiResult) {
+          aiResult.innerHTML = renderAiPanel(data.signalement);
+        }
         form.reset();
       } catch (error) {
         alert.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+        if (aiResult) {
+          aiResult.innerHTML = renderAiPanel(null);
+        }
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.innerHTML = '<i class="bi bi-send me-2"></i>Envoyer le signalement';
+        }
       }
     });
   }
@@ -223,7 +369,7 @@
 
     contentRoot.innerHTML = contenus.map((item, index) => `
       <div class="col-md-4">
-        <article class="card content-card border-0 surface">
+        <article class="card content-card border-0 surface" id="${html(item.slug)}">
           <img src="${educationImages[index % educationImages.length]}" alt="${html(item.titre)}">
           <div class="card-body">
             <span class="badge text-bg-light align-self-start">${html(item.categorie)}</span>
@@ -315,7 +461,7 @@
         <tr>
           <td>${html(item.titre)}</td>
           <td>${html(item.commune_nom)}</td>
-          <td>${html(item.type_dechet)}</td>
+          <td>${html(item.type_dechet)}${aiSummary(item)}</td>
           <td>
             <select class="form-select form-select-sm" data-status-signalement="${item.id}">
               ${['nouveau', 'en_cours', 'resolu', 'rejete'].map((statut) => `<option value="${statut}" ${statut === item.statut ? 'selected' : ''}>${statut.replace('_', ' ')}</option>`).join('')}

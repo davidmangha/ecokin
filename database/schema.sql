@@ -59,7 +59,15 @@ CREATE TABLE signalements (
   commune_id INT NULL,
   titre VARCHAR(180) NOT NULL,
   description TEXT NOT NULL,
+  article_sujet VARCHAR(160) NULL,
   type_dechet ENUM('plastique', 'organique', 'electronique', 'dangereux', 'encombrant', 'autre') NOT NULL,
+  categorie_ia ENUM('dechet', 'erosion', 'mixte', 'inconnu') NULL DEFAULT 'inconnu',
+  type_dechet_ia ENUM('plastique', 'organique', 'electronique', 'dangereux', 'encombrant', 'autre', 'inconnu') NULL DEFAULT 'inconnu',
+  erosion_detectee BOOLEAN NOT NULL DEFAULT FALSE,
+  confiance_ia DECIMAL(5, 2) NULL,
+  resume_ia VARCHAR(255) NULL,
+  articles_sujet JSON NULL,
+  analyse_ia JSON NULL,
   adresse VARCHAR(255) NULL,
   latitude DECIMAL(10, 7) NOT NULL,
   longitude DECIMAL(10, 7) NOT NULL,
@@ -75,6 +83,8 @@ CREATE TABLE signalements (
     ON DELETE SET NULL,
   INDEX idx_signalements_statut (statut),
   INDEX idx_signalements_type_dechet (type_dechet),
+  INDEX idx_signalements_categorie_ia (categorie_ia),
+  INDEX idx_signalements_erosion (erosion_detectee),
   INDEX idx_signalements_position (latitude, longitude)
 ) ENGINE=InnoDB;
 
@@ -166,7 +176,22 @@ INSERT INTO contenus_educatifs (titre, slug, categorie, resume, contenu) VALUES
  'Un depot sauvage attire les nuisances, bouche les caniveaux et augmente les risques d inondation. Signalez rapidement les points critiques avec photo et position GPS.'),
 ('Compostage urbain simple', 'compostage-urbain-simple', 'Reduction',
  'Transformer une partie des dechets organiques en ressource utile.',
- 'Les restes de fruits, legumes et feuilles peuvent etre compostes dans un bac ferme et aere. Evitez la viande, les huiles et les produits chimiques.');
+ 'Les restes de fruits, legumes et feuilles peuvent etre compostes dans un bac ferme et aere. Evitez la viande, les huiles et les produits chimiques.'),
+('Comprendre l erosion urbaine', 'comprendre-erosion-urbaine', 'Erosion',
+ 'Identifier les ravines, sols nus et zones fragilisees par le ruissellement.',
+ 'Une erosion visible doit etre documentee avec photo, position GPS et description du terrain. Les caniveaux bouches et les sols denudes aggravent rapidement le risque.'),
+('Proteger les pentes et caniveaux', 'proteger-pentes-caniveaux', 'Prevention',
+ 'Limiter le ruissellement et surveiller les zones sensibles apres de fortes pluies.',
+ 'La vegetation, le curage des caniveaux et la protection des pentes reduisent les degats. Signalez les fissures, ravines et affaissements des leur apparition.'),
+('Dechets electroniques', 'dechets-electroniques', 'Tri',
+ 'Mettre a part piles, batteries, cables et petits appareils.',
+ 'Les composants electroniques peuvent contenir des metaux et produits toxiques. Evitez de les melanger aux ordures courantes et signalez les depots importants.'),
+('Dechets dangereux', 'dechets-dangereux', 'Sante',
+ 'Reconnaitre les huiles, produits chimiques, batteries et objets a risque.',
+ 'Ne touchez pas directement les dechets dangereux. Gardez une distance, ajoutez une photo claire et priorisez le signalement pour une intervention adaptee.'),
+('Objets encombrants', 'objets-encombrants', 'Collecte',
+ 'Organiser le retrait des gros volumes sans bloquer la route ou les caniveaux.',
+ 'Les meubles, gravats et gros objets doivent etre regroupes proprement et signales avec precision afin de faciliter la collecte specialisee.');
 
 INSERT INTO campagnes (commune_id, titre, description, date_debut, date_fin, lieu, objectif, statut) VALUES
 (3, 'Nettoyage citoyen de la Gombe',

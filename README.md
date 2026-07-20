@@ -10,6 +10,7 @@ EcoKin est une plateforme ecologique locale pour Kinshasa. Elle permet aux citoy
 - Architecture: MVC avec dossiers `routes`, `controllers`, `models`
 - Uploads: `multer` vers le dossier `uploads`
 - Authentification: JWT + mots de passe hashes avec `bcryptjs`
+- IA photo: analyse optionnelle avec OpenAI Responses API pour detecter dechets et erosion
 
 ## Arborescence
 
@@ -61,6 +62,9 @@ DB_USER=root
 DB_PASSWORD=
 DB_NAME=ecokin
 JWT_SECRET=change_this_secret_for_local_development
+JWT_EXPIRES_IN=7d
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5.6
 ```
 
 5. Lancer le projet:
@@ -93,6 +97,25 @@ http://localhost:3000
 - Profil utilisateur: `/profil.html`
 - Administration: `/administration.html`
 
+## Analyse IA des photos
+
+Quand une photo est ajoutee a un signalement, EcoKin peut demander a OpenAI d'identifier le type de dechet, la presence d'erosion, un niveau de confiance et des articles de sensibilisation lies au sujet.
+
+Pour l'activer sur Render, ajoutez ces variables dans `Environment`, puis relancez un deploy:
+
+```env
+OPENAI_API_KEY=votre_cle_openai
+OPENAI_MODEL=gpt-5.6
+```
+
+Sans `OPENAI_API_KEY`, le signalement reste envoye normalement et l'analyse affiche un etat en attente.
+
+Pour une base deja creee, appliquez la migration:
+
+```bash
+npm run migrate:ai
+```
+
 ## Creer un administrateur
 
 Inscrivez d'abord un utilisateur via `/inscription.html`, puis passez son role a `admin` dans MySQL:
@@ -112,7 +135,7 @@ Reconnectez-vous ensuite pour acceder a `/administration.html`.
 - `GET /api/auth/me`: session courante
 - `GET /api/communes`: liste des communes
 - `GET /api/signalements`: liste publique des signalements
-- `POST /api/signalements`: creation d'un signalement avec photo, position GPS et JWT
+- `POST /api/signalements`: creation d'un signalement avec photo, position GPS, JWT et analyse IA optionnelle
 - `GET /api/dashboard/stats`: statistiques du tableau de bord
 - `GET /api/education/contenus`: contenus educatifs publies
 - `GET /api/education/campagnes`: campagnes actives ou planifiees
