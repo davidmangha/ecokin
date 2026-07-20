@@ -88,6 +88,7 @@ http://localhost:3000
 ## Pages incluses
 
 - Accueil: `/index.html`
+- Actualites: `/actualites.html`
 - Inscription: `/inscription.html`
 - Connexion: `/connexion.html`
 - Tableau de bord: `/dashboard.html`

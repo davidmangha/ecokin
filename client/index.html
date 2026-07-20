@@ -19,6 +19,7 @@
       <div class="collapse navbar-collapse" id="mainNav">
         <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
           <li class="nav-item"><a class="nav-link" data-page-link="accueil" href="/index.html">Accueil</a></li>
+          <li class="nav-item"><a class="nav-link" data-page-link="actualites" href="/actualites.html">Actualites</a></li>
           <li class="nav-item"><a class="nav-link" data-page-link="carte" href="/carte.html">Carte</a></li>
           <li class="nav-item"><a class="nav-link" data-page-link="sensibilisation" href="/sensibilisation.html">Sensibilisation</a></li>
           <li class="nav-item d-none" data-auth-only><a class="nav-link" data-page-link="dashboard" href="/dashboard.html">Tableau de bord</a></li>
@@ -43,7 +44,7 @@
   <main class="hero-shell">
     <section class="hero-visual">
       <div class="container hero-content">
-        <p class="text-uppercase fw-bold mb-2">Plateforme ecologique de Kinshasa</p>
+        <p class="text-uppercase fw-bold mb-2 hero-kicker">Plateforme ecologique de Kinshasa</p>
         <h1 class="mb-3">EcoKin</h1>
         <p class="mb-4">Signalez les points critiques, visualisez les incidents sur la carte et suivez les interventions pour une ville plus propre.</p>
         <div class="d-flex flex-wrap gap-2">
@@ -56,18 +57,40 @@
             <span>signalements publics</span>
           </div>
           <div class="hero-metric">
-            <strong>14</strong>
+            <strong data-count-to="14">14</strong>
             <span>communes couvertes</span>
           </div>
           <div class="hero-metric">
-            <strong>GPS</strong>
-            <span>position precise</span>
+            <strong>IA</strong>
+            <span>photo analysee</span>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="feature-band">
+    <section class="impact-strip reveal">
+      <div class="container">
+        <div class="impact-grid">
+          <div>
+            <span class="pulse-dot"></span>
+            <strong>Carte publique</strong>
+            <span>Incidents visibles quartier par quartier</span>
+          </div>
+          <div>
+            <span class="pulse-dot amber"></span>
+            <strong>Analyse IA</strong>
+            <span>Type de dechet et erosion detectes par photo</span>
+          </div>
+          <div>
+            <span class="pulse-dot coral"></span>
+            <strong>Actions locales</strong>
+            <span>Campagnes et contenus utiles au bon moment</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="feature-band reveal">
       <div class="container">
         <div class="row g-4 align-items-center">
           <div class="col-lg-5">
@@ -75,14 +98,14 @@
             <p class="lead-tight mb-4">EcoKin connecte les citoyens, les collecteurs et les administrateurs autour d'une meme carte des dechets.</p>
             <div class="row g-3">
               <div class="col-md-6">
-                <div class="feature-tile">
+                <div class="feature-tile reveal">
                   <span class="feature-icon"><i class="bi bi-camera"></i></span>
                   <h3 class="h5">Photo preuve</h3>
                   <p class="mb-0 text-muted">Chaque signalement peut inclure une image et une description claire.</p>
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="feature-tile">
+                <div class="feature-tile reveal">
                   <span class="feature-icon"><i class="bi bi-crosshair"></i></span>
                   <h3 class="h5">GPS integre</h3>
                   <p class="mb-0 text-muted">La position du point critique est enregistree pour faciliter l'intervention.</p>
@@ -99,7 +122,22 @@
       </div>
     </section>
 
-    <section class="feature-band pt-0">
+    <section class="news-band reveal">
+      <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+          <div>
+            <span class="eyebrow">Actualites EcoKin</span>
+            <h2 class="section-title h1 mb-2">Ce qui bouge dans les quartiers</h2>
+            <p class="lead-tight mb-0">Articles, campagnes et alertes utiles pour suivre les actions ecologiques locales.</p>
+          </div>
+          <a class="btn btn-outline-primary" href="/actualites.html"><i class="bi bi-newspaper me-2"></i>Toutes les actualites</a>
+        </div>
+        <div id="homeNewsGrid" class="row g-4"></div>
+        <div id="homeCampaignStrip" class="campaign-strip mt-4"></div>
+      </div>
+    </section>
+
+    <section class="feature-band pt-0 reveal">
       <div class="container">
         <div class="row g-4">
           <div class="col-lg-6">
@@ -108,28 +146,28 @@
           <div class="col-lg-6">
             <div class="row g-3 h-100">
               <div class="col-md-6">
-                <a href="/dashboard.html" class="surface quick-action p-4 d-block text-decoration-none text-dark h-100">
+                <a href="/dashboard.html" class="surface quick-action p-4 d-block text-decoration-none text-dark h-100 reveal">
                   <span class="feature-icon"><i class="bi bi-speedometer2"></i></span>
                   <h2 class="h5">Tableau de bord</h2>
                   <p class="mb-0 text-muted">Statistiques, signalements recents et suivi des priorites.</p>
                 </a>
               </div>
               <div class="col-md-6">
-                <a href="/sensibilisation.html" class="surface quick-action p-4 d-block text-decoration-none text-dark h-100">
+                <a href="/sensibilisation.html" class="surface quick-action p-4 d-block text-decoration-none text-dark h-100 reveal">
                   <span class="feature-icon"><i class="bi bi-megaphone"></i></span>
                   <h2 class="h5">Sensibilisation</h2>
                   <p class="mb-0 text-muted">Contenus utiles et campagnes locales de prevention.</p>
                 </a>
               </div>
               <div class="col-md-6">
-                <a href="/profil.html" class="surface quick-action p-4 d-block text-decoration-none text-dark h-100">
+                <a href="/profil.html" class="surface quick-action p-4 d-block text-decoration-none text-dark h-100 reveal">
                   <span class="feature-icon"><i class="bi bi-person-gear"></i></span>
                   <h2 class="h5">Profil</h2>
                   <p class="mb-0 text-muted">Commune, contact et informations utilisateur.</p>
                 </a>
               </div>
               <div class="col-md-6">
-                <a href="/administration.html" class="surface quick-action p-4 d-block text-decoration-none text-dark h-100">
+                <a href="/administration.html" class="surface quick-action p-4 d-block text-decoration-none text-dark h-100 reveal">
                   <span class="feature-icon"><i class="bi bi-shield-check"></i></span>
                   <h2 class="h5">Administration</h2>
                   <p class="mb-0 text-muted">Utilisateurs, statuts et gestion des dechets.</p>

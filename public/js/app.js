@@ -1,11 +1,25 @@
 (function () {
   const kinshasaCenter = [-4.325, 15.322];
+  const contentImages = [
+    '/public/images/ecokin-education.png',
+    '/public/images/ecokin-reporting.png',
+    '/public/images/ecokin-hero.png'
+  ];
 
   function formatDate(value) {
     if (!value) return '-';
     return new Intl.DateTimeFormat('fr-FR', {
       dateStyle: 'medium',
       timeStyle: 'short'
+    }).format(new Date(value));
+  }
+
+  function formatDay(value) {
+    if (!value) return '-';
+    return new Intl.DateTimeFormat('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
     }).format(new Date(value));
   }
 
@@ -133,6 +147,150 @@
     `;
   }
 
+  function categoryIcon(category = '') {
+    const value = String(category).toLowerCase();
+    if (value.includes('erosion')) return 'bi-moisture';
+    if (value.includes('tri')) return 'bi-recycle';
+    if (value.includes('sante')) return 'bi-shield-plus';
+    if (value.includes('prevention')) return 'bi-signpost-split';
+    if (value.includes('collecte')) return 'bi-truck';
+    return 'bi-newspaper';
+  }
+
+  function articleUrl(item) {
+    return item?.slug ? `/sensibilisation.html#${encodeURIComponent(item.slug)}` : '/sensibilisation.html';
+  }
+
+  function renderNewsCard(item, index, featured = false) {
+    const image = item.image_url || contentImages[index % contentImages.length];
+    const cardClass = featured ? 'news-card featured reveal' : 'news-card surface reveal';
+
+    return `
+      <article class="${cardClass}">
+        <a href="${articleUrl(item)}" class="news-media" aria-label="${html(item.titre)}">
+          <img src="${image}" alt="${html(item.titre)}">
+        </a>
+        <div class="news-body">
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+            <span class="news-tag"><i class="bi ${categoryIcon(item.categorie)}"></i>${html(item.categorie, 'EcoKin')}</span>
+            <span class="news-date">${formatDay(item.created_at)}</span>
+          </div>
+          <h3 class="${featured ? 'h2' : 'h5'} section-title mb-2">${html(item.titre)}</h3>
+          <p class="text-muted mb-3">${html(item.resume)}</p>
+          <a class="news-link" href="${articleUrl(item)}">Lire l'article <i class="bi bi-arrow-right"></i></a>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderCampaignPill(item) {
+    return `
+      <a class="campaign-pill reveal" href="/actualites.html#campagnes">
+        <span class="campaign-date">${formatDay(item.date_debut)}</span>
+        <span>
+          <strong>${html(item.titre)}</strong>
+          <small>${html(item.commune_nom)} - ${html(item.lieu)}</small>
+        </span>
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    `;
+  }
+
+  function renderTimelineItem(icon, title, meta, body, badge = '') {
+    return `
+      <div class="timeline-item reveal">
+        <span class="timeline-icon"><i class="bi ${icon}"></i></span>
+        <div>
+          <div class="d-flex flex-wrap align-items-center gap-2">
+            <h3 class="h6 mb-0">${html(title)}</h3>
+            ${badge ? `<span class="ai-chip muted">${html(badge)}</span>` : ''}
+          </div>
+          <div class="small text-muted mb-1">${html(meta)}</div>
+          <p class="mb-0">${html(body)}</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderMiniStat(label, value, icon) {
+    return `
+      <div class="mini-stat">
+        <span><i class="bi ${icon}"></i></span>
+        <strong>${html(value)}</strong>
+        <small>${html(label)}</small>
+      </div>
+    `;
+  }
+
+  function setupReveals(root = document) {
+    const elements = root.querySelectorAll('.reveal:not(.reveal-ready)');
+    if (!elements.length) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof IntersectionObserver === 'undefined') {
+      elements.forEach((element) => {
+        element.classList.add('reveal-ready', 'in-view');
+      });
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.16 });
+
+    elements.forEach((element, index) => {
+      element.classList.add('reveal-ready');
+      element.style.setProperty('--reveal-delay', `${Math.min(index * 70, 280)}ms`);
+      observer.observe(element);
+    });
+  }
+
+  function animateNumber(element, target) {
+    if (!element) return;
+    const finalValue = Number(target);
+    if (!Number.isFinite(finalValue)) {
+      element.textContent = target;
+      return;
+    }
+
+    const duration = 900;
+    const start = performance.now();
+
+    function tick(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      element.textContent = Math.round(finalValue * eased);
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  function animateStaticCounts() {
+    document.querySelectorAll('[data-count-to]:not([data-counted])').forEach((element) => {
+      element.dataset.counted = 'true';
+      animateNumber(element, element.dataset.countTo);
+    });
+  }
+
+  async function fetchNewsPayload() {
+    const [contentData, campaignData, signalementData] = await Promise.all([
+      window.EcoKin.api.request('/education/contenus'),
+      window.EcoKin.api.request('/education/campagnes'),
+      window.EcoKin.api.request('/signalements')
+    ]);
+
+    return {
+      contenus: contentData.contenus || [],
+      campagnes: campaignData.campagnes || [],
+      signalements: signalementData.signalements || []
+    };
+  }
+
   async function loadCommunes(selectors = '.commune-select') {
     const selects = document.querySelectorAll(selectors);
     if (!selects.length) return [];
@@ -201,7 +359,90 @@
 
     const { signalements } = await window.EcoKin.api.request('/signalements');
     addSignalementMarkers(map, signalements);
-    document.querySelector('[data-home-count]').textContent = signalements.length;
+    animateNumber(document.querySelector('[data-home-count]'), signalements.length);
+  }
+
+  async function initHomeNews() {
+    const root = document.querySelector('#homeNewsGrid');
+    if (!root) return;
+
+    try {
+      const { contenus, campagnes } = await fetchNewsPayload();
+      const highlighted = contenus.slice(0, 3);
+
+      root.innerHTML = highlighted.map((item, index) => `
+        <div class="${index === 0 ? 'col-lg-6' : 'col-lg-3 col-md-6'}">
+          ${renderNewsCard(item, index, index === 0)}
+        </div>
+      `).join('') || '<div class="empty-state">Aucune actualite disponible.</div>';
+
+      const campaignRoot = document.querySelector('#homeCampaignStrip');
+      if (campaignRoot) {
+        campaignRoot.innerHTML = campagnes.slice(0, 3).map(renderCampaignPill).join('');
+      }
+
+      setupReveals();
+    } catch (error) {
+      root.innerHTML = '<div class="empty-state">Les actualites seront disponibles dans quelques instants.</div>';
+    }
+  }
+
+  async function initActualitesPage() {
+    const listRoot = document.querySelector('#actualitesList');
+    if (!listRoot) return;
+
+    try {
+      const { contenus, campagnes, signalements } = await fetchNewsPayload();
+      const featured = contenus[0];
+      const featuredRoot = document.querySelector('#actualitesFeatured');
+      const miniStats = document.querySelector('#actualitesMiniStats');
+      const campaignRoot = document.querySelector('#actualitesCampaigns');
+      const signalementRoot = document.querySelector('#actualitesSignalements');
+
+      if (featuredRoot) {
+        featuredRoot.innerHTML = featured
+          ? renderNewsCard(featured, 0, true)
+          : '<div class="empty-state">Aucune actualite principale.</div>';
+      }
+
+      listRoot.innerHTML = contenus.map((item, index) => `
+        <div class="col-md-6 col-xl-4">
+          ${renderNewsCard(item, index)}
+        </div>
+      `).join('') || '<div class="empty-state">Aucun article disponible.</div>';
+
+      if (miniStats) {
+        miniStats.innerHTML = [
+          renderMiniStat('articles', contenus.length, 'bi-newspaper'),
+          renderMiniStat('campagnes', campagnes.length, 'bi-megaphone'),
+          renderMiniStat('signalements', signalements.length, 'bi-geo-alt')
+        ].join('');
+      }
+
+      if (campaignRoot) {
+        campaignRoot.innerHTML = campagnes.map((item) => renderTimelineItem(
+          'bi-megaphone',
+          item.titre,
+          `${formatDay(item.date_debut)} - ${text(item.commune_nom)}`,
+          item.description,
+          item.statut
+        )).join('') || '<div class="empty-state">Aucune campagne active.</div>';
+      }
+
+      if (signalementRoot) {
+        signalementRoot.innerHTML = signalements.slice(0, 6).map((item) => renderTimelineItem(
+          booleanValue(item.erosion_detectee) ? 'bi-moisture' : 'bi-pin-map',
+          item.titre,
+          `${formatDate(item.created_at)} - ${text(item.commune_nom)}`,
+          item.resume_ia || item.description,
+          item.type_dechet
+        )).join('') || '<div class="empty-state">Aucun signalement public.</div>';
+      }
+
+      setupReveals();
+    } catch (error) {
+      listRoot.innerHTML = '<div class="empty-state">Impossible de charger les actualites pour le moment.</div>';
+    }
   }
 
   async function initDashboard() {
@@ -361,16 +602,10 @@
       window.EcoKin.api.request('/education/campagnes')
     ]);
 
-    const educationImages = [
-      '/public/images/ecokin-education.png',
-      '/public/images/ecokin-reporting.png',
-      '/public/images/ecokin-hero.png'
-    ];
-
     contentRoot.innerHTML = contenus.map((item, index) => `
       <div class="col-md-4">
         <article class="card content-card border-0 surface" id="${html(item.slug)}">
-          <img src="${educationImages[index % educationImages.length]}" alt="${html(item.titre)}">
+          <img src="${item.image_url || contentImages[index % contentImages.length]}" alt="${html(item.titre)}">
           <div class="card-body">
             <span class="badge text-bg-light align-self-start">${html(item.categorie)}</span>
             <h2 class="h5 mb-0">${html(item.titre)}</h2>
@@ -514,6 +749,9 @@
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
+    setupReveals();
+    animateStaticCounts();
+
     const user = await window.EcoKin.auth.guardPage();
     if (user === null && ['dashboard', 'signaler', 'profil', 'administration'].includes(document.body.dataset.page)) {
       return;
@@ -523,7 +761,11 @@
     window.EcoKin.auth.bindLoginForm();
 
     const page = document.body.dataset.page;
-    if (page === 'accueil') await initHome();
+    if (page === 'accueil') {
+      await initHome();
+      await initHomeNews();
+    }
+    if (page === 'actualites') await initActualitesPage();
     if (page === 'inscription') await loadCommunes();
     if (page === 'dashboard') await initDashboard();
     if (page === 'signaler') await initSignalementForm();
@@ -531,5 +773,8 @@
     if (page === 'sensibilisation') await initEducation();
     if (page === 'profil') await initProfile(user);
     if (page === 'administration') await initAdmin();
+
+    setupReveals();
+    animateStaticCounts();
   });
 })();
